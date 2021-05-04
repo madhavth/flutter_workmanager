@@ -3,6 +3,8 @@ package be.tramckrijte.workmanager
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
+import android.widget.Toast
 import androidx.concurrent.futures.ResolvableFuture
 import androidx.work.ListenableWorker
 import androidx.work.WorkerParameters
@@ -92,6 +94,17 @@ class BackgroundWorker(
 
     private fun stopEngine(result: Result?) {
         val fetchDuration = System.currentTimeMillis() - startTime
+
+
+        Log.d("STOP_ENGINE", "$result")
+
+        if(result== Result.failure() || result == null)
+        {
+            //invoke method to stop
+            Handler(Looper.getMainLooper()).post {
+                backgroundChannel.invokeMethod("cancelledWork", null)
+            }
+        }
 
         if (isInDebug) {
             DebugHelper.postTaskCompleteNotification(

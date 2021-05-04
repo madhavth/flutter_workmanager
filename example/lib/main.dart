@@ -14,15 +14,21 @@ const simplePeriodicTask = "simplePeriodicTask";
 const simplePeriodic1HourTask = "simplePeriodic1HourTask";
 
 void callbackDispatcher() {
+  Workmanager().setOnTaskStoppedListener(() {
+    print('task stopped because workmanager wanted it to stop ty');
+  });
+
   Workmanager().executeTask((task, inputData) async {
     switch (task) {
       case simpleTaskKey:
+        await Future.delayed(Duration(seconds: 10));
         print("$simpleTaskKey was executed. inputData = $inputData");
         final prefs = await SharedPreferences.getInstance();
         prefs.setBool("test", true);
         print("Bool from prefs: ${prefs.getBool("test")}");
         break;
       case simpleDelayedTask:
+        await Future.delayed(Duration(minutes: 2));
         print("$simpleDelayedTask was executed");
         break;
       case simplePeriodicTask:
@@ -34,7 +40,7 @@ void callbackDispatcher() {
       case Workmanager.iOSBackgroundTask:
         print("The iOS background fetch was triggered");
         Directory? tempDir = await getTemporaryDirectory();
-        String? tempPath = tempDir?.path;
+        String? tempPath = tempDir.path;
         print(
             "You can access other plugins in the background, for example Directory.getTemporaryDirectory(): $tempPath");
         break;
@@ -101,6 +107,7 @@ class _MyAppState extends State<MyApp> {
                     Workmanager().registerOneOffTask(
                       "1",
                       simpleTaskKey,
+                      constraints: Constraints(networkType: NetworkType.connected),
                       inputData: <String, dynamic>{
                         'int': 1,
                         'bool': true,

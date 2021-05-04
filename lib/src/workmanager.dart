@@ -89,6 +89,12 @@ class Workmanager {
   void executeTask(final BackgroundTaskHandler backgroundTask) {
     WidgetsFlutterBinding.ensureInitialized();
     _backgroundChannel.setMethodCallHandler((call) async {
+      if(call.method == "cancelledWork")
+        {
+          _onTaskStopped!();
+          return true;
+        }
+
       final inputData = call.arguments["be.tramckrijte.workmanager.INPUT_DATA"];
       return backgroundTask(
         call.arguments["be.tramckrijte.workmanager.DART_TASK"],
@@ -97,6 +103,14 @@ class Workmanager {
     });
     _backgroundChannel.invokeMethod("backgroundChannelInitialized");
   }
+
+  VoidCallback? _onTaskStopped;
+
+  setOnTaskStoppedListener(VoidCallback callback)
+  {
+    _onTaskStopped = callback;
+  }
+
 
   /// This call is required if you wish to use the [WorkManager] plugin.
   /// [callbackDispatcher] is a top level function which will be invoked by Android
